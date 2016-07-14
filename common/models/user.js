@@ -301,6 +301,19 @@ module.exports = function(User) {
     return fn.promise;
   };
 
+  User.deleteById = function(tokenId, fn) {
+    fn = fn || utils.createPromiseCallback();
+    this.relations.accessTokens.modelTo.findById(tokenId, function(err, accessToken) {
+      if (err) {
+        fn(err);
+      } else if (accessToken) {
+        accessToken.destroy(fn);
+      } else {
+        fn(new Error('could not find user'));
+      }
+    });
+    return fn.promise;
+  };
   /**
    * Compare the given `password` with the users hashed password.
    *
