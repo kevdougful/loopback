@@ -220,17 +220,17 @@ describe('User', function() {
           if (err) return done(err);
           assert(accessToken.userId);
           User.deleteById(instance.id, function(err) {
-             if(err) return done(err);
-             AccessToken.findById(accessToken.userId, function(err, notFound) {
-               if(err) return done(err);
-               assert.equal(notFound, null);
+            if (err) return done(err);
+            AccessToken.findById(accessToken.userId, function(err, notFound) {
+              if (err) return done(err);
+              assert.equal(notFound, null);
 
-               done();
-             });
-       })
+              done();
+            });
+          });
+        });
+      });
     });
-  });
-});
 
     describe('custom password hash', function() {
       var defaultHashPassword, defaultValidatePassword;
