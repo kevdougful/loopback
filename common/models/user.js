@@ -303,7 +303,7 @@ module.exports = function(User) {
 
   User.deleteById = function(tokenId, fn) {
     fn = fn || utils.createPromiseCallback();
-    this.relations.accessTokens.modelTo.findById(tokenId, function(err, accessToken) {
+    this.accessTokens.deleteById(tokenId, function(err, accessToken) {
       if (err) {
         fn(err);
       } else if (accessToken) {

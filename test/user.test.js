@@ -217,23 +217,16 @@ describe('User', function() {
     it('invalidates the user\'s accessToken when the user is deleted', function(done) {
       User.create({ email: 'b@c.com', password: 'bar' }, function(err, instance) {
         User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
-          console.log('instance1 :'+instance.id+' accessToken: '+accessToken.id);
           if (err) return done(err);
-          assert(accessToken.id);
-          User.destroyById(instance.id, function(err) {
-            console.log('instance2 :'+instance.id+' email : '+instance.email+ ' accessToken :'+accessToken.id);
-            if (err) return done(err);
-           assert(accessToken.id);
-           assert(instance.id);
-           assert(instance.email);
-           console.log('instance final :'+instance.id+' email :  '+instance.email+ ' accessToken: '+accessToken.id);
-           AccessToken.destroyById(accessToken.id, function(err){
+          assert(accessToken.userId);
+          User.deleteById(instance.id, function(err) {
              if(err) return done(err);
-             assert(accessToken.id);
-             console.log('instance final2 :'+instance.id+' email :  '+instance.email+ ' accessToken: '+accessToken.id);
-           done();
-           })
+             AccessToken.findById(accessToken.userId, function(err, notFound) {
+               if(err) return done(err);
+               assert.equal(notFound, null);
 
+               done();
+             });
        })
     });
   });
