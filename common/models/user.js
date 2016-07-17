@@ -301,19 +301,21 @@ module.exports = function(User) {
     return fn.promise;
   };
 
-  User.deleteById = function(tokenId, fn) {
+
+  User.observe('before delete', function(ctx, next, tokenId, fn) {
     fn = fn || utils.createPromiseCallback();
-    this.accessTokens.deleteById(tokenId, function(err, accessToken) {
+    this.accessTokens.destroyById(tokenId, function(err, accessToken) {
       if (err) {
         fn(err);
       } else if (accessToken) {
         accessToken.destroy(fn);
       } else {
-        fn(new Error('could not find user'));
+        fn(new Error('could not find accessToken'));
       }
     });
-    return fn.promise;
-  };
+    next();
+  });
+
   /**
    * Compare the given `password` with the users hashed password.
    *

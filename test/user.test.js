@@ -215,17 +215,23 @@ describe('User', function() {
     });
 
     it('invalidates the user\'s accessToken when the user is deleted', function(done) {
-      User.create({ email: 'b@c.com', password: 'bar' }, function(err, instance) {
+      User.create({ email: 'b@c.com', password: 'bar' }, function(err, user) {
         User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
           if (err) return done(err);
           assert(accessToken.userId);
-          User.deleteById(instance.id, function(err) {
+          console.log(accessToken.userId);
+          User.deleteById(user.id, function(err) {
             if (err) return done(err);
-            AccessToken.findById(accessToken.userId, function(err, notFound) {
+            User.findById(user.id, function(err, userFound) {
               if (err) return done(err);
-              assert.equal(notFound, null);
+              expect(userFound).to.equal(null);
+              AccessToken.find({ where: { userId: user.id }}, function(err, tokens) {
+                if (err) return done(err);
+                expect(tokens).to.equal(null);
+                console.log(tokens);
 
-              done();
+                done();
+              });
             });
           });
         });
