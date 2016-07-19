@@ -220,6 +220,7 @@ describe('User', function() {
           if (err) return done(err);
           assert(accessToken.userId);
           console.log(accessToken.userId);
+          console.log('>>>user:', user);
           User.deleteById(user.id, function(err) {
             if (err) return done(err);
             User.findById(user.id, function(err, userFound) {
@@ -227,7 +228,7 @@ describe('User', function() {
               expect(userFound).to.equal(null);
               AccessToken.find({ where: { userId: user.id }}, function(err, tokens) {
                 if (err) return done(err);
-                expect(tokens).to.equal(null);
+                expect(tokens.length).to.equal(0);
                 console.log(tokens);
 
                 done();

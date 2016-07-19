@@ -301,20 +301,24 @@ module.exports = function(User) {
     return fn.promise;
   };
 
+  User.observe('before delete', function(ctx, next) {
+    var AccessToken = ctx.Model.app.models.AccessToken;
 
-  User.observe('before delete', function(ctx, next, tokenId, fn) {
-    fn = fn || utils.createPromiseCallback();
-    this.accessTokens.destroyById(tokenId, function(err, accessToken) {
-      if (err) {
-        fn(err);
-      } else if (accessToken) {
-        accessToken.destroy(fn);
-      } else {
-        fn(new Error('could not find accessToken'));
-      }
+    AccessToken.find({
+      where: {
+        userId: ctx.where.id,
+      },
+    }, function(err, tokens) {
+      tokens.forEach(function(token) {
+        AccessToken.destroyById(token.id, function() {
+          console.log('Deleted token %s for user ', token.id, token.userId);
+        });
+      });
     });
+
     next();
   });
+
 
   /**
    * Compare the given `password` with the users hashed password.
