@@ -6,6 +6,7 @@
 require('./support');
 var loopback = require('../');
 var User, AccessToken;
+var async = require('async');
 
 describe('User', function() {
   var validCredentialsEmail = 'foo@bar.com';
@@ -214,28 +215,92 @@ describe('User', function() {
       assert(u2.password === u1.password);
     });
 
-    it('invalidates the user\'s accessToken when the user is deleted', function(done) {
-      User.create({ email: 'b@c.com', password: 'bar' }, function(err, user) {
-        User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
-          if (err) return done(err);
-          assert(accessToken.userId);
-          console.log(accessToken.userId);
-          console.log('>>>user:', user);
-          User.deleteById(user.id, function(err) {
-            if (err) return done(err);
-            User.findById(user.id, function(err, userFound) {
+    it('invalidates the user\'s accessToken when the user is deleted By id', function(done) {
+      var usersId;
+      async.series([
+        function(next) {
+          User.create({ email: 'b@c.com', password: 'bar' }, function(err, user) {
+            usersId = user.id;
+            if (err) return done (err);
+            next();
+          });
+        },
+        function(next) {
+          User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
+            if (err) return done (err);
+            assert(accessToken.userId);
+            console.log('acessToken.userId: ', accessToken.userId);
+            console.log('>>>user: ', usersId);
+            next();
+          });
+        },
+        function(next) {
+          User.deleteById(usersId, function(err) {
+            if (err) return done (err);
+            next();
+          });
+        },
+        function(next) {
+          User.findById(usersId, function(err, userFound)  {
+            if (err) return done (err);
+            expect(userFound).to.equal(null);
+            AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
               if (err) return done(err);
-              expect(userFound).to.equal(null);
-              AccessToken.find({ where: { userId: user.id }}, function(err, tokens) {
-                if (err) return done(err);
-                expect(tokens.length).to.equal(0);
-                console.log(tokens);
-
-                done();
-              });
+              expect(tokens.length).to.equal(0);
+              console.log('tokens: ', tokens);
+              next();
             });
           });
-        });
+        },
+      ], function(err) {
+        if (err) return done (err);
+        console.log('series functions are done');
+        done();
+      });
+    });
+
+    it('invalidates the user\'s accessToken when the user is deleted all', function(done) {
+      var usersId, accessTokenId;
+      async.series([
+        function(next) {
+          User.create({ email: 'b@c.com', password: 'bar' }, function(err, user) {
+            usersId = user.id;
+            if (err) return done (err);
+            next();
+          });
+        },
+        function(next) {
+          User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
+            accessTokenId = accessToken.userId;
+            if (err) return done (err);
+            assert(accessTokenId);
+            console.log('acessToken.userId: ', accessTokenId);
+            console.log('>>>user: ', usersId);
+            next();
+          });
+        },
+        function(next) {
+          User.deleteAll({ id: accessTokenId }, function(err) {
+            if (err) return done (err);
+            next();
+          });
+        },
+        function(next) {
+          User.findById(usersId, function(err, userFound)  {
+            if (err) return done (err);
+            expect(userFound).to.equal(null);
+            AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
+              if (err) return done(err);
+              expect(tokens.length).to.equal(0);
+              console.log('tokens: ', tokens);
+              next();
+            });
+          });
+        },
+      ], function(err) {
+        if (err) return done (err);
+        console.log('series functions are done');
+        done();
       });
     });
 

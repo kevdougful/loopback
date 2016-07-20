@@ -302,21 +302,18 @@ module.exports = function(User) {
   };
 
   User.observe('before delete', function(ctx, next) {
-    var AccessToken = ctx.Model.app.models.AccessToken;
+    var AccessToken = ctx.Model.relations.accessTokens.modelTo;
+    ctx.Model.find({ where: ctx.where }, function(err, list) {
+      if (err) return next(err);
 
-    AccessToken.find({
-      where: {
-        userId: ctx.where.id,
-      },
-    }, function(err, tokens) {
-      tokens.forEach(function(token) {
-        AccessToken.destroyById(token.id, function() {
-          console.log('Deleted token %s for user ', token.id, token.userId);
-        });
-      });
+      var pkName = ctx.Model.definition.idName() || 'id';
+      var ids = list.map(function(u) { return u[pkName]; });
+      ctx.where = {};
+      ctx.where[pkName] = { inq: ids };
+
+      AccessToken.destroyAll({ userId: { inq: ids }}, next);
+      console.log('Deleted token for users ', ids);
     });
-
-    next();
   });
 
 
