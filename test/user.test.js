@@ -221,37 +221,36 @@ describe('User', function() {
         function(next) {
           User.create({ email: 'b@c.com', password: 'bar' }, function(err, user) {
             usersId = user.id;
-            if (err) return done (err);
+            if (err) return next(err);
             next(err);
           });
         },
         function(next) {
           User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
-            if (err) return done (err);
+            if (err) return next(err);
             assert(accessToken.userId);
             next(err);
           });
         },
         function(next) {
           User.deleteById(usersId, function(err) {
-            if (err) return done (err);
+            if (err) return next(err);
             next(err);
           });
         },
         function(next) {
           User.findById(usersId, function(err, userFound)  {
-            if (err) return done (err);
+            if (err) return next(err);
             expect(userFound).to.equal(null);
             AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
-              if (err) return done(err);
+              if (err) return next(err);
               expect(tokens.length).to.equal(0);
               next(err);
             });
           });
         },
       ], function(err) {
-        if (err) return done (err);
-        console.log('series functions are executed');
+        if (err) return next(err);
         done();
       });
     });
@@ -263,14 +262,14 @@ describe('User', function() {
           User.create([{ name: 'myname', email: 'b@c.com', password: 'bar' },
           { name: 'myname', email: 'd@c.com', password: 'bar' }], function(err, user) {
             usersId = user.id;
-            if (err) return done (err);
+            if (err) return next (err);
             next(err);
           });
         },
         function(next) {
           User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
             accessTokenId = accessToken.userId;
-            if (err) return done (err);
+            if (err) return next (err);
             assert(accessTokenId);
             next(err);
           });
@@ -278,31 +277,30 @@ describe('User', function() {
         function(next) {
           User.login({ email: 'd@c.com', password: 'bar' }, function(err, accessToken) {
             accessTokenId = accessToken.userId;
-            if (err) return done (err);
+            if (err) return next (err);
             assert(accessTokenId);
             next(err);
           });
         },
         function(next) {
           User.deleteAll({ name: 'myname' }, function(err, user) {
-            if (err) return done (err);
+            if (err) return next (err);
             next(err);
           });
         },
         function(next) {
           User.find({ where: { name: 'myname' }}, function(err, userFound)  {
-            if (err) return done (err);
+            if (err) return next (err);
             expect(userFound.length).to.equal(0);
             AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
-              if (err) return done(err);
+              if (err) return next(err);
               expect(tokens.length).to.equal(0);
               next(err);
             });
           });
         },
       ], function(err) {
-        if (err) return done (err);
-        console.log('series functions are executed');
+        if (err) return next(err);
         done();
       });
     });
