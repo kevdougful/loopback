@@ -303,16 +303,16 @@ module.exports = function(User) {
 
   User.observe('before delete', function(ctx, next) {
     var AccessToken = ctx.Model.relations.accessTokens.modelTo;
-    ctx.Model.find({ where: ctx.where }, function(err, list) {
+    var pkName = ctx.Model.definition.idName() || 'id';
+    ctx.Model.find({ fields: ctx.where[pkName] }, function(err, list) {
       if (err) return next(err);
 
-      var pkName = ctx.Model.definition.idName() || 'id';
       var ids = list.map(function(u) { return u[pkName]; });
       ctx.where = {};
       ctx.where[pkName] = { inq: ids };
 
       AccessToken.destroyAll({ userId: { inq: ids }}, next);
-      debug('Deleted token for users ', ids);
+      console.log('Deleted token for users ', ids);
     });
   });
 
