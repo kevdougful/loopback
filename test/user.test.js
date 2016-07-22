@@ -222,20 +222,20 @@ describe('User', function() {
           User.create({ email: 'b@c.com', password: 'bar' }, function(err, user) {
             usersId = user.id;
             if (err) return done (err);
-            next();
+            next(err);
           });
         },
         function(next) {
           User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
             if (err) return done (err);
             assert(accessToken.userId);
-            next();
+            next(err);
           });
         },
         function(next) {
           User.deleteById(usersId, function(err) {
             if (err) return done (err);
-            next();
+            next(err);
           });
         },
         function(next) {
@@ -245,13 +245,13 @@ describe('User', function() {
             AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
               if (err) return done(err);
               expect(tokens.length).to.equal(0);
-              next();
+              next(err);
             });
           });
         },
       ], function(err) {
         if (err) return done (err);
-        console.log('series functions are done');
+        console.log('series functions are executed');
         done();
       });
     });
@@ -264,7 +264,7 @@ describe('User', function() {
           { name: 'myname', email: 'd@c.com', password: 'bar' }], function(err, user) {
             usersId = user.id;
             if (err) return done (err);
-            next();
+            next(err);
           });
         },
         function(next) {
@@ -272,7 +272,7 @@ describe('User', function() {
             accessTokenId = accessToken.userId;
             if (err) return done (err);
             assert(accessTokenId);
-            next();
+            next(err);
           });
         },
         function(next) {
@@ -280,13 +280,13 @@ describe('User', function() {
             accessTokenId = accessToken.userId;
             if (err) return done (err);
             assert(accessTokenId);
-            next();
+            next(err);
           });
         },
         function(next) {
           User.deleteAll({ name: 'myname' }, function(err, user) {
             if (err) return done (err);
-            next();
+            next(err);
           });
         },
         function(next) {
@@ -296,13 +296,13 @@ describe('User', function() {
             AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
               if (err) return done(err);
               expect(tokens.length).to.equal(0);
-              next();
+              next(err);
             });
           });
         },
       ], function(err) {
         if (err) return done (err);
-        console.log('series functions are done');
+        console.log('series functions are executed');
         done();
       });
     });
