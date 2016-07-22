@@ -263,9 +263,12 @@ describe('User', function() {
       var usersId, accessTokenId;
       async.series([
         function(next) {
-          User.create({ email: 'b@c.com', password: 'bar' }, function(err, user) {
+          User.create([{ name: 'myusername', email: 'b@c.com', password: 'bar' },
+          { name: 'myusername', email: 'd@c.com', password: 'bar' }], function(err, user) {
             usersId = user.id;
             if (err) return done (err);
+            console.log('user 0', user[0].name, user[0].email);
+            console.log('user 1', user[1].name, user[1].email);
             next();
           });
         },
@@ -275,20 +278,31 @@ describe('User', function() {
             if (err) return done (err);
             assert(accessTokenId);
             console.log('acessToken.userId: ', accessTokenId);
-            console.log('>>>user: ', usersId);
+            //console.log('>>>user: ', usersId);
             next();
           });
         },
         function(next) {
-          User.deleteAll({ id: accessTokenId }, function(err) {
+          User.login({ email: 'd@c.com', password: 'bar' }, function(err, accessToken) {
+            accessTokenId = accessToken.userId;
+            if (err) return done (err);
+            assert(accessTokenId);
+            console.log('acessToken.userId: ', accessTokenId);
+          //  console.log('>>>user: ', usersId);
+            next();
+          });
+        },
+        function(next) {
+          User.deleteAll({where : {name: 'myusername'}}, function(err) {
             if (err) return done (err);
             next();
           });
         },
         function(next) {
-          User.findById(usersId, function(err, userFound)  {
+          User.find({where: {name: 'myusername'}}, function(err, userFound)  {
             if (err) return done (err);
-            expect(userFound).to.equal(null);
+            console.log(userFound);
+            expect(userFound.length).to.equal(2);
             AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
               if (err) return done(err);
               expect(tokens.length).to.equal(0);
