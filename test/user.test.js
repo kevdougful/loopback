@@ -221,7 +221,6 @@ describe('User', function() {
         function(next) {
           User.create({ email: 'b@c.com', password: 'bar' }, function(err, user) {
             usersId = user.id;
-            if (err) return next(err);
             next(err);
           });
         },
@@ -229,12 +228,11 @@ describe('User', function() {
           User.login({ email: 'b@c.com', password: 'bar' }, function(err, accessToken) {
             if (err) return next(err);
             assert(accessToken.userId);
-            next(err);
+            next();
           });
         },
         function(next) {
           User.deleteById(usersId, function(err) {
-            if (err) return next(err);
             next(err);
           });
         },
@@ -245,12 +243,12 @@ describe('User', function() {
             AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
               if (err) return next(err);
               expect(tokens.length).to.equal(0);
-              next(err);
+              next();
             });
           });
         },
       ], function(err) {
-        if (err) return next(err);
+        if (err) return done(err);
         done();
       });
     });
@@ -262,7 +260,6 @@ describe('User', function() {
           User.create([{ name: 'myname', email: 'b@c.com', password: 'bar' },
           { name: 'myname', email: 'd@c.com', password: 'bar' }], function(err, user) {
             usersId = user.id;
-            if (err) return next (err);
             next(err);
           });
         },
@@ -271,7 +268,7 @@ describe('User', function() {
             accessTokenId = accessToken.userId;
             if (err) return next (err);
             assert(accessTokenId);
-            next(err);
+            next();
           });
         },
         function(next) {
@@ -279,12 +276,11 @@ describe('User', function() {
             accessTokenId = accessToken.userId;
             if (err) return next (err);
             assert(accessTokenId);
-            next(err);
+            next();
           });
         },
         function(next) {
           User.deleteAll({ name: 'myname' }, function(err, user) {
-            if (err) return next (err);
             next(err);
           });
         },
@@ -295,12 +291,12 @@ describe('User', function() {
             AccessToken.find({ where: { userId: usersId }}, function(err, tokens) {
               if (err) return next(err);
               expect(tokens.length).to.equal(0);
-              next(err);
+              next();
             });
           });
         },
       ], function(err) {
-        if (err) return next(err);
+        if (err) return done(err);
         done();
       });
     });
